@@ -32,7 +32,7 @@ public class Solution1 {
             return result[(m + n -1) / 2];
         }
     }
-    public static void main(String[] args) {
+    public static void main(Str                                                                                  ing[] args) {
         int[] nums1 = new int[]{1,2,3};
         int[] nums2 = new int[]{4,5,6};
         System.out.println(new Solution1().findMedianSortedArrays(nums1,nums2));
