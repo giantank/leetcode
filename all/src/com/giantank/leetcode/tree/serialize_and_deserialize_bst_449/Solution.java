@@ -19,42 +19,14 @@ import java.util.*;
  * 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
  */
 public class Solution {
-    // Encodes a tree to a single string.
     public String serialize(TreeNode root) {
-        String res = "";
-        if (root == null) {
-            return res;
+        StringBuilder sb = postOrder(root, new StringBuilder());
+        if (sb.length() < 1) {
+            return null;
         }
-        List<Integer> list = new ArrayList<>();
-        LinkedList<TreeNode> queue = new LinkedList<>();
-        queue.offer(root);
-        while (!queue.isEmpty()) {
-            TreeNode node = queue.poll();
-            if (node != null) {
-                list.add(node.val);
-            } else {
-                list.add(null);
-            }
-            if (node.left == null && node.right == null) {
-                continue;
-            }
-            queue.offer(node.left);
-            queue.offer(node.right);
-        }
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
-            Integer e = list.get(i);
-            if (e != null) {
-                sb.append(e);
-            } else {
-                sb.append("null");
-            }
-            if (i != list.size() - 1) {
-                sb.append(",");
-            }
-        }
-        res = sb.toString();
-        return res;
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
+
     }
 
     // Decodes your encoded data to tree.
@@ -62,58 +34,40 @@ public class Solution {
         if (data == null || data.trim().length() < 1) {
             return null;
         }
-        String[] vals = data.split(",");
-        int len = vals.length;
-        if (len < 1) {
-            return null;
+        String[] dataStrs = data.split(",");
+        ArrayDeque<Integer> dataArray = new ArrayDeque<Integer> ();
+        for (String str: dataStrs) {
+            dataArray.add(Integer.parseInt(str));
         }
-        TreeNode root = null;
-        Map<Integer, TreeNode> indexMap = new HashMap<>();
-        for (int i = 0; i < len; i++) {
-            TreeNode node = indexMap.get(i);
-            if (node == null) {
-                node = createTreeNode(vals[i]);
-                if (node == null) {
-                    continue;
-                }
-                indexMap.put(i, node);
-            }
-            if (i == 0) {
-                root = node;
-            }
-            int leftIndex = 2 * i + 1;
-            if (leftIndex < len && !"null".equals(vals[leftIndex])) {
-                TreeNode leftNode = createTreeNode(vals[leftIndex]);
-                if (leftNode != null) {
-                    indexMap.put(leftIndex, leftNode);
-                    node.left = leftNode;
-                }
-            }
-            int rightIndex = 2 * i + 2;
-            if (rightIndex < len && !"null".equals(vals[rightIndex])) {
-                TreeNode rightNode = createTreeNode(vals[rightIndex]);
-                if (rightNode != null) {
-                    indexMap.put(rightIndex, rightNode);
-                    node.right = rightNode;
-                }
-
-            }
-        }
+        int lower = Integer.MIN_VALUE;
+        int upper = Integer.MAX_VALUE;
+        TreeNode root = helper(lower, upper, dataArray);
         return root;
     }
 
-    private TreeNode createTreeNode(String val) {
-        if (val == null) {
+    private StringBuilder  postOrder(TreeNode root, StringBuilder sb) {
+        if (root == null) return sb;
+        postOrder(root.left, sb);
+        postOrder(root.right, sb);
+        sb.append(root.val);
+        sb.append(',');
+        return sb;
+
+    }
+
+    private  TreeNode helper(Integer lower, Integer upper, ArrayDeque<Integer> dataArray) {
+        if (dataArray.isEmpty()) {
             return null;
         }
-        Integer intVal = 0;
-        try {
-            intVal = Integer.parseInt(val);
-        } catch (NumberFormatException e) {
+        Integer val = dataArray.getLast();
+        if ( val > upper || val < lower) {
             return null;
         }
-        TreeNode node = new TreeNode(intVal);
-        return node;
+        val = dataArray.removeLast();
+        TreeNode root = new TreeNode(val);
+        root.right = helper(val, upper, dataArray);
+        root.left = helper(lower, val, dataArray);
+        return root;
     }
 
 }
